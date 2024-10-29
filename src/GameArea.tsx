@@ -39,26 +39,34 @@ interface EnemyPosition {
   top: number;
 }
 
-const Ship = ({ leftPosition }: { leftPosition: number }) => {
+interface ShipProps {
+  leftPosition: number;
+}
+
+interface EnemyProps {
+  position: EnemyPosition;
+}
+
+const Ship: React.FC<ShipProps> = ({ leftPosition }) => {
   return (
     <div
       className="absolute bottom-8 w-8 h-8 bg-green-400 transition-all rounded-full"
       style={{ left: leftPosition }}
-    ></div>
+    />
   );
 };
 
-const Enemy = ({ position }: { position: EnemyPosition }) => {
+const Enemy: React.FC<EnemyProps> = ({ position }) => {
   const { left, top } = position;
   return (
     <div
       className="absolute bg-yellow-300 w-8 h-8 rounded-full"
       style={{ left: left, top: top }}
-    ></div>
+    />
   );
 };
 
-const GameArea = () => {
+const GameArea: React.FC = () => {
   const [shipPosition, setShipPosition] = useState(
     GAME_CONSTANTS.POSITIONS.START
   );
@@ -148,7 +156,7 @@ const GameArea = () => {
   }, [enemyDirection]);
 
   return (
-    <div className={`bg-gray-700 relative w-[600px] h-[600px]`}>
+    <div className="bg-gray-700 relative w-[600px] h-[600px]">
       {enemies.map((position, idx) => (
         <Enemy position={position} key={idx} />
       ))}
