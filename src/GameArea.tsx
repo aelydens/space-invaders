@@ -1,5 +1,34 @@
 import { useState, useEffect } from "react";
 
+const GAME_CONSTANTS = {
+  DIMENSIONS: {
+    WIDTH: 600,
+    SHIP_WIDTH: 32,
+  },
+  POSITIONS: {
+    LEFT_MAX: 0,
+    RIGHT_MAX: 600 - 32, // WIDTH - SHIP_WIDTH
+    START: (600 - 32) / 2, // (WIDTH - SHIP_WIDTH) / 2
+  },
+  MOVEMENT: {
+    SHIP_DISTANCE: 10,
+    ENEMY_SPEED: 2,
+    UPDATE_INTERVAL: 50,
+  },
+  ENEMY: {
+    ROWS: 2,
+    PER_ROW: 8,
+    SPACING: {
+      HORIZONTAL: 60,
+      VERTICAL: 50,
+    },
+    START: {
+      X: 50,
+      Y: 50,
+    },
+  },
+} as const;
+
 enum EnemyDirection {
   Left = "left",
   Right = "right",
@@ -30,15 +59,9 @@ const Enemy = ({ position }: { position: EnemyPosition }) => {
 };
 
 const GameArea = () => {
-  const SHIP_WIDTH = 32;
-  const GAME_WIDTH = 600;
-  const START_POSITION = GAME_WIDTH / 2 - SHIP_WIDTH / 2;
-  const LEFT_MAX_POSITION = 0;
-  const RIGHT_MAX_POSITION = GAME_WIDTH - SHIP_WIDTH;
-  const MOVE_DISTANCE = 10;
-  const ENEMY_SPEED = 2;
-
-  const [shipPosition, setShipPosition] = useState(START_POSITION);
+  const [shipPosition, setShipPosition] = useState(
+    GAME_CONSTANTS.POSITIONS.START
+  );
   const [enemies, setEnemies] = useState<EnemyPosition[]>([]);
   const [enemyDirection, setEnemyDirection] = useState<EnemyDirection>(
     EnemyDirection.Right
@@ -47,26 +70,33 @@ const GameArea = () => {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "ArrowLeft") {
       setShipPosition((prevPosition) =>
-        Math.max(LEFT_MAX_POSITION, prevPosition - MOVE_DISTANCE)
+        Math.max(
+          GAME_CONSTANTS.POSITIONS.LEFT_MAX,
+          prevPosition - GAME_CONSTANTS.MOVEMENT.SHIP_DISTANCE
+        )
       );
     } else if (e.key === "ArrowRight") {
       setShipPosition((prevPosition) =>
-        Math.min(RIGHT_MAX_POSITION, prevPosition + MOVE_DISTANCE)
+        Math.min(
+          GAME_CONSTANTS.POSITIONS.RIGHT_MAX,
+          prevPosition + GAME_CONSTANTS.MOVEMENT.SHIP_DISTANCE
+        )
       );
     }
   };
 
   const initializeEnemies = () => {
     const newEnemies: EnemyPosition[] = [];
-    const HORIZONTAL_SPACING = 60;
-    const VERTICAL_SPACING = 50;
-    const NUM_ENEMIES_PER_ROW = 8;
 
-    for (let row = 0; row < 2; row++) {
-      for (let i = 0; i < NUM_ENEMIES_PER_ROW; i++) {
+    for (let row = 0; row < GAME_CONSTANTS.ENEMY.ROWS; row++) {
+      for (let i = 0; i < GAME_CONSTANTS.ENEMY.PER_ROW; i++) {
         newEnemies.push({
-          left: i * HORIZONTAL_SPACING + 50,
-          top: row * VERTICAL_SPACING + 50,
+          left:
+            i * GAME_CONSTANTS.ENEMY.SPACING.HORIZONTAL +
+            GAME_CONSTANTS.ENEMY.START.X,
+          top:
+            row * GAME_CONSTANTS.ENEMY.SPACING.VERTICAL +
+            GAME_CONSTANTS.ENEMY.START.Y,
         });
       }
     }
@@ -81,14 +111,16 @@ const GameArea = () => {
         ...prevEnemies.map((enemy) => enemy.left)
       );
 
-      if (rightMostEnemy >= RIGHT_MAX_POSITION) {
+      if (rightMostEnemy >= GAME_CONSTANTS.POSITIONS.RIGHT_MAX) {
         setEnemyDirection(EnemyDirection.Left);
-      } else if (leftMostEnemy <= LEFT_MAX_POSITION) {
+      } else if (leftMostEnemy <= GAME_CONSTANTS.POSITIONS.LEFT_MAX) {
         setEnemyDirection(EnemyDirection.Right);
       }
 
       const movement =
-        enemyDirection === EnemyDirection.Right ? ENEMY_SPEED : -ENEMY_SPEED;
+        enemyDirection === EnemyDirection.Right
+          ? GAME_CONSTANTS.MOVEMENT.ENEMY_SPEED
+          : -GAME_CONSTANTS.MOVEMENT.ENEMY_SPEED;
 
       return prevEnemies.map((enemy) => ({
         ...enemy,
@@ -108,7 +140,10 @@ const GameArea = () => {
   }, []);
 
   useEffect(() => {
-    const moveEnemiesInterval = setInterval(moveEnemies, 50);
+    const moveEnemiesInterval = setInterval(
+      moveEnemies,
+      GAME_CONSTANTS.MOVEMENT.UPDATE_INTERVAL
+    );
     return () => clearInterval(moveEnemiesInterval);
   }, [enemyDirection]);
 
