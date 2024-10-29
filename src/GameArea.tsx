@@ -61,7 +61,7 @@ const Enemy: React.FC<EnemyProps> = ({ position }) => {
   return (
     <div
       className="absolute bg-yellow-300 w-8 h-8 rounded-full"
-      style={{ left: left, top: top }}
+      style={{ left, top }}
     />
   );
 };
@@ -75,7 +75,7 @@ const GameArea: React.FC = () => {
     EnemyDirection.Right
   );
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent): void => {
     if (e.key === "ArrowLeft") {
       setShipPosition((prevPosition) =>
         Math.max(
